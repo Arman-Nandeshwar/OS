@@ -1,0 +1,83 @@
+#include <stdio.h>
+
+#define MAX_PAGES 100
+#define MAX_FRAMES 10
+
+void lruPageReplacement(int referenceString[], int n, int frameSize) {
+    int frame[MAX_FRAMES];
+    int pageFaults = 0;
+    int pageLastUsed[MAX_FRAMES];
+    int frameIndex = 0;
+
+    for (int i = 0; i < frameSize; i++) {
+        frame[i] = -1; // Initialize frame with -1 indicating an empty slot
+        pageLastUsed[i] = 0;  // Initialize count for each page to zero
+    }
+
+    printf("Incoming\tFrame\n");
+
+    for (int i = 0; i < n; i++) {
+        int page = referenceString[i];
+        int pageFound = 0;
+
+        // Check if the page is already present in the main memory
+        for (int j = 0; j < frameSize; j++) {
+            if (frame[j] == page) {
+                pageFound = 1;
+                pageLastUsed[j] = i+1; // Update the count and time
+                break;
+            }
+        }
+
+        // If the page is not present, find the least recently used page and replace it
+        if (!pageFound) {
+            int minCountIndex = 0;
+            for (int j = 1; j < frameSize; j++) {
+                if (pageLastUsed[j] < pageLastUsed[minCountIndex]) {
+                    minCountIndex = j;
+                }
+            }
+
+            frame[minCountIndex] = page; // Replace the least recently used page
+            pageLastUsed[minCountIndex] = i+1; // Update the count and time
+            pageFaults++;
+        }
+
+        // Print the current state of the frames
+        printf("%d\t\t", page);
+        for (int j = 0; j < frameSize; j++) {
+            if (frame[j] != -1)
+                printf("%d\t\t", frame[j]);
+            else
+                printf("-\t\t");
+        }
+        printf("\n");
+    }
+
+    printf("Total Page Faults: %d\n", pageFaults);
+}
+
+int main() {
+    int referenceString[MAX_PAGES];
+    int n, frameSize;
+
+    // Input the sequence of page requests
+    printf("Enter the number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter the sequence of page requests:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &referenceString[i]);
+    }
+
+    // Input the number of frames in the main memory
+    printf("Enter the number of frames: ");
+    scanf("%d", &frameSize);
+
+    // Perform LRU page replacement
+    lruPageReplacement(referenceString, n, frameSize);
+
+    return 0;
+}
+
+
